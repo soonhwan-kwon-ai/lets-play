@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>친구야, 나랑 놀래? 🎉</title>
+<meta property="og:title" content="친구야, 나랑 놀래? 🎉">
+<meta property="og:description" content="눌러보면 알아 😆">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --bg: #fff4cc;
+    --bg2: #d9f4ec;
+    --ink: #2d2a32;
+    --muted: #6b6672;
+    --primary: #ff7a45;
+    --primary-dark: #e9602b;
+    --mint: #3cc4a0;
+    --sky: #5aa9ff;
+    --card: #ffffff;
+    --line: #f0e6cf;
+    --chip: #fffaf0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: 'Gowun Dodum', sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg) 0%, #ffe9d6 50%, var(--bg2) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .floaters { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .floaters span {
+    position: absolute; bottom: -50px; font-size: 26px; opacity: .55;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-115vh) rotate(260deg); }
+  }
+
+  main {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px;
+  }
+  .screen { display: none; width: 100%; max-width: 440px; text-align: center; animation: pop .35s ease; }
+  .screen.active { display: block; }
+  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+
+  .panel {
+    background: rgba(255,255,255,.85);
+    border-radius: 28px;
+    padding: 32px 22px 28px;
+    box-shadow: 0 12px 40px rgba(255,122,69,.15);
+    border: 2px solid #fff;
+  }
+  .big-emoji { font-size: 64px; line-height: 1; margin-bottom: 10px; }
+  h1, h2 { font-family: 'Jua', sans-serif; font-weight: 400; margin: 0 0 10px; line-height: 1.3; }
+  h1 { font-size: 30px; }
+  h2 { font-size: 25px; }
+  p.sub { color: var(--muted); margin: 0 0 22px; font-size: 16px; line-height: 1.5; }
+
+  .btn {
+    font-family: 'Jua', sans-serif; font-size: 19px;
+    border: none; border-radius: 999px; padding: 14px 26px;
+    cursor: pointer; transition: transform .15s, background .15s, box-shadow .15s;
+    color: #fff; background: var(--primary);
+    box-shadow: 0 5px 0 var(--primary-dark);
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--primary-dark); }
+  .btn.ghost { background: #fff; color: var(--muted); box-shadow: 0 5px 0 #e6dccb; }
+  .btn.mint { background: var(--mint); box-shadow: 0 5px 0 #2a9e80; }
+  .btn.sky { background: var(--sky); box-shadow: 0 5px 0 #3b86d8; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.wide { width: 100%; }
+
+  .btn-row { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; min-height: 70px; }
+  #noBtn { transition: left .25s ease, top .25s ease; z-index: 50; }
+  #yesBtn { transition: transform .2s ease, font-size .2s ease, padding .2s ease; }
+
+  .field { text-align: left; margin-bottom: 16px; }
+  .field label { display: block; font-family: 'Jua', sans-serif; font-size: 17px; margin-bottom: 6px; }
+  .field input {
+    width: 100%; font-size: 17px; font-family: inherit;
+    padding: 13px 14px; border-radius: 16px; border: 2px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .field input:focus { outline: none; border-color: var(--primary); }
+
+  .any-btn { margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .chip {
+    font-family: 'Jua', sans-serif; font-size: 17px;
+    padding: 14px 8px; border-radius: 18px; border: 2px solid var(--line);
+    background: var(--chip); color: var(--ink); cursor: pointer;
+    transition: transform .12s, border-color .12s, background .12s;
+  }
+  .chip:hover { border-color: var(--primary); }
+  .chip:active { transform: scale(.96); background: #ffe9d6; }
+
+  .custom { display: flex; gap: 8px; }
+  .custom input {
+    flex: 1; min-width: 0; font-size: 16px; font-family: inherit;
+    padding: 12px 14px; border-radius: 16px; border: 2px dashed #e7c9a8; background: #fff; color: var(--ink);
+  }
+  .custom input:focus { outline: none; border-style: solid; border-color: var(--primary); }
+  .custom .btn { font-size: 16px; padding: 12px 16px; white-space: nowrap; }
+  .hint { font-size: 13px; color: var(--muted); margin: 8px 0 0; text-align: left; }
+
+  .nag {
+    min-height: 28px; margin-top: 16px; font-family: 'Jua', sans-serif; font-size: 19px; color: var(--primary-dark);
+  }
+  .shake { animation: shake .4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); } 40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); } 80% { transform: translateX(6px); }
+  }
+
+  /* ---------- 약속 카드 ---------- */
+  #card {
+    position: relative; overflow: hidden;
+    background: #fffdf7;
+    border-radius: 26px;
+    padding: 30px 24px 26px;
+    border: 3px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    text-align: center;
+    margin: 0 8px 26px;
+  }
+  #card .stamp {
+    position: absolute; top: 16px; right: -34px; transform: rotate(35deg);
+    background: var(--mint); color: #fff; font-family: 'Jua', sans-serif; font-size: 13px;
+    padding: 5px 40px; letter-spacing: 1px;
+  }
+  #card .card-emoji { font-size: 40px; margin-bottom: 4px; }
+  #card .card-title { font-family: 'Jua', sans-serif; font-size: 26px; margin: 0; }
+  #card .card-en { font-size: 11px; letter-spacing: 3px; color: var(--muted); margin: 4px 0 18px; }
+  #card .rows { text-align: left; border-top: 2px dashed #e4d8bf; padding-top: 12px; }
+  #card .row { display: flex; gap: 10px; padding: 10px 2px; border-bottom: 2px dashed #e4d8bf; align-items: baseline; }
+  #card .row .k { font-family: 'Jua', sans-serif; width: 84px; flex-shrink: 0; color: var(--muted); font-size: 16px; }
+  #card .row .v { font-family: 'Jua', sans-serif; font-size: 18px; word-break: break-all; }
+  #card .card-foot { margin-top: 18px; font-family: 'Jua', sans-serif; font-size: 17px; color: var(--primary-dark); }
+
+  .end-actions { display: flex; flex-direction: column; gap: 14px; }
+
+  /* 저장 오버레이 (모바일) */
+  #saveOverlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(30,25,35,.8); padding: 24px 16px; overflow-y: auto;
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  #saveOverlay.show { display: flex; }
+  #saveOverlay img { max-width: 100%; max-height: 70vh; border-radius: 18px; background: #fff; }
+  #saveOverlay p { color: #fff; font-family: 'Jua', sans-serif; font-size: 18px; text-align: center; margin: 16px 0; }
+
+  @media (max-width: 360px) {
+    h1 { font-size: 26px; } h2 { font-size: 22px; }
+    .chip { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="floaters" id="floaters"></div>
+
+<main>
+
+  <!-- 1. 놀래? -->
+  <section class="screen active" id="s-intro">
+    <div class="panel">
+      <div class="big-emoji">🎉</div>
+      <h1>친구야, 나랑 놀래?</h1>
+      <p class="sub">신중하게 골라줘 😏</p>
+      <div class="btn-row" id="introRow">
+        <button class="btn" id="yesBtn">응 좋아!</button>
+        <button class="btn ghost" id="noBtn">싫어</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 반응 -->
+  <section class="screen" id="s-yay">
+    <div class="panel">
+      <div class="big-emoji">😆</div>
+      <h1>오 진짜?? 놀 거지??</h1>
+      <p class="sub">거절할 줄 알고 마음의 준비 하고 있었는데...</p>
+      <button class="btn mint" data-next="s-date">당연하지!</button>
+    </div>
+  </section>
+
+  <!-- 3. 날짜 시간 -->
+  <section class="screen" id="s-date">
+    <div class="panel">
+      <div class="big-emoji">📅</div>
+      <h2>그래서... 언제가 편해?</h2>
+      <p class="sub">날짜랑 시간을 골라줘!</p>
+      <div class="field">
+        <label for="dateInput">📆 날짜</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="field">
+        <label for="timeInput">⏰ 시간</label>
+        <input type="time" id="timeInput">
+      </div>
+      <button class="btn wide" id="dateNext" disabled>이 날 좋아!</button>
+    </div>
+  </section>
+
+  <!-- 4. 뭐 하고 놀까 -->
+  <section class="screen" id="s-play">
+    <div class="panel">
+      <div class="big-emoji">🕹️</div>
+      <h2>뭐 하고 놀까?</h2>
+      <p class="sub">하고 싶은 거 골라줘!</p>
+      <div class="choice" data-key="play" data-any="뭐든 좋아 😊"></div>
+    </div>
+  </section>
+
+  <!-- 5. 밥? -->
+  <section class="screen" id="s-meal-q">
+    <div class="panel">
+      <div class="big-emoji">🍚</div>
+      <h2>밥은 먹을거야?</h2>
+      <p class="sub">배고프면 말해줘!</p>
+      <div class="btn-row">
+        <button class="btn" id="mealYes">웅!</button>
+        <button class="btn ghost" id="mealNo">아니</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 메뉴 -->
+  <section class="screen" id="s-meal">
+    <div class="panel">
+      <div class="big-emoji">😋</div>
+      <h2>좋아! 뭐 먹을까?</h2>
+      <p class="sub">땡기는 걸로 골라줘!</p>
+      <div class="choice" data-key="meal" data-any="뭐든 좋아 😊"></div>
+    </div>
+  </section>
+
+  <!-- 7. 술? -->
+  <section class="screen" id="s-drink-q">
+    <div class="panel">
+      <div class="big-emoji">🍻</div>
+      <h2 id="drinkTitle">그럼 술?</h2>
+      <p class="sub">한 잔 하자~</p>
+      <div class="btn-row">
+        <button class="btn" id="drinkYes">웅!</button>
+        <button class="btn ghost" id="drinkNo">안 돼</button>
+      </div>
+      <div class="nag" id="nag"></div>
+    </div>
+  </section>
+
+  <!-- 8. 안주 -->
+  <section class="screen" id="s-anju">
+    <div class="panel">
+      <div class="big-emoji">🥂</div>
+      <h2>역시 내 친구! 안주는?</h2>
+      <p class="sub">같이 먹을 안주 골라줘!</p>
+      <div class="choice" data-key="anju" data-any="아무거나 다 좋아 😊"></div>
+    </div>
+  </section>
+
+  <!-- 9. 카드 -->
+  <section class="screen" id="s-end">
+    <div class="big-emoji">🙌</div>
+    <h1>약속 잡았다!</h1>
+    <p class="sub">거절 안 해줘서 고마워 ㅎㅎ 완전 기대돼!</p>
+
+    <div id="card">
+      <div class="stamp">CONFIRMED</div>
+      <div class="card-emoji">🤙</div>
+      <p class="card-title">우리 노는 날</p>
+      <p class="card-en">LET'S · HANG · OUT</p>
+      <div class="rows">
+        <div class="row"><span class="k">📅 날짜</span><span class="v" id="c-date">-</span></div>
+        <div class="row"><span class="k">⏰ 시간</span><span class="v" id="c-time">-</span></div>
+        <div class="row"><span class="k">🕹️ 놀거리</span><span class="v" id="c-play">-</span></div>
+        <div class="row"><span class="k">🍚 밥</span><span class="v" id="c-meal">-</span></div>
+        <div class="row"><span class="k">🍻 술</span><span class="v" id="c-drink">-</span></div>
+      </div>
+      <div class="card-foot">🎉 이 날 무조건 나와 🎉</div>
+    </div>
+
+    <div class="end-actions">
+      <button class="btn" id="saveBtn">📸 이미지 저장해서 답장 보내기</button>
+      <button class="btn ghost" id="restartBtn">처음부터 다시하기</button>
+    </div>
+  </section>
+
+</main>
+
+<div id="saveOverlay">
+  <img id="saveImg" alt="약속 카드">
+  <p>이미지를 꾹 눌러서 저장한 다음<br>답장으로 보내줘! 💌</p>
+  <button class="btn ghost" id="closeOverlay">닫기</button>
+</div>
+
+<script>
+(function () {
+  // ---------- 선택지 ----------
+  var OPTIONS = {
+    play: ['🖥️ 피시방', '🎤 노래방', '🎳 볼링장', '🎱 당구장', '🎬 영화관', '☕ 카페', '🎲 보드게임카페', '🛍️ 쇼핑'],
+    meal: ['🍕 피자', '🍣 초밥', '🍔 햄버거', '🍝 파스타', '🍚 국밥', '🍜 라멘', '🍗 치킨', '🥩 고기', '🌶️ 마라탕', '🍢 떡볶이'],
+    anju: ['🍗 치킨', '🥓 삼겹살', '🔥 곱창·막창', '🐷 족발·보쌈', '🥞 파전', '🍢 오뎅탕', '🦑 마른안주', '🍟 감자튀김', '🐔 닭발', '🍲 부대찌개']
+  };
+  var NEXT = { play: 's-meal-q', meal: 's-drink-q', anju: 's-end' };
+
+  var state = { date: '', time: '', play: '', meal: '', drink: '' };
+  var noCount = 0;
+
+  // ---------- 화면 전환 ----------
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+    if (id === 's-end') fillCard();
+    if (id === 's-intro') resetNoBtn();
+  }
+  document.querySelectorAll('[data-next]').forEach(function (b) {
+    b.addEventListener('click', function () { go(b.dataset.next); });
+  });
+
+  // ---------- 1. 도망가는 '싫어' 버튼 ----------
+  var yesBtn = document.getElementById('yesBtn');
+  var noBtn = document.getElementById('noBtn');
+  var dodges = 0;
+  function dodge(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+    var maxX = window.innerWidth - w - 16;
+    var maxY = window.innerHeight - h - 16;
+    var x, y, tries = 0;
+    var yr = yesBtn.getBoundingClientRect();
+    do {
+      x = 16 + Math.random() * Math.max(0, maxX - 16);
+      y = 16 + Math.random() * Math.max(0, maxY - 16);
+      tries++;
+    } while (tries < 20 && x < yr.right + 10 && x + w > yr.left - 10 && y < yr.bottom + 10 && y + h > yr.top - 10);
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    dodges++;
+    var scale = Math.min(1 + dodges * 0.08, 1.6);
+    yesBtn.style.transform = 'scale(' + scale + ')';
+  }
+  noBtn.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') dodge(e); });
+  noBtn.addEventListener('touchstart', dodge, { passive: false });
+  noBtn.addEventListener('pointerdown', dodge);
+  noBtn.addEventListener('click', dodge);
+  yesBtn.addEventListener('click', function () { go('s-yay'); });
+
+  function resetNoBtn() {
+    noBtn.style.position = ''; noBtn.style.left = ''; noBtn.style.top = '';
+    yesBtn.style.transform = '';
+    dodges = 0;
+  }
+
+  // ---------- 3. 날짜/시간 ----------
+  var dateInput = document.getElementById('dateInput');
+  var timeInput = document.getElementById('timeInput');
+  var dateNext = document.getElementById('dateNext');
+  try {
+    var t = new Date();
+    var iso = new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    dateInput.min = iso;
+  } catch (e) {}
+  function checkDate() { dateNext.disabled = !(dateInput.value && timeInput.value); }
+  dateInput.addEventListener('input', checkDate);
+  timeInput.addEventListener('input', checkDate);
+  dateInput.addEventListener('change', checkDate);
+  timeInput.addEventListener('change', checkDate);
+  dateNext.addEventListener('click', function () {
+    state.date = dateInput.value; state.time = timeInput.value;
+    go('s-play');
+  });
+
+  // ---------- 선택지 화면 공통 ----------
+  document.querySelectorAll('.choice').forEach(function (box) {
+    var key = box.dataset.key;
+
+    var any = document.createElement('button');
+    any.className = 'btn sky wide any-btn';
+    any.textContent = '난 ' + box.dataset.any;
+    any.addEventListener('click', function () { pick(key, box.dataset.any.replace(/ 😊$/, '')); });
+    box.appendChild(any);
+
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+    OPTIONS[key].forEach(function (label) {
+      var c = document.createElement('button');
+      c.className = 'chip';
+      c.textContent = label;
+      c.addEventListener('click', function () { pick(key, label); });
+      grid.appendChild(c);
+    });
+    box.appendChild(grid);
+
+    var row = document.createElement('div');
+    row.className = 'custom';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 20;
+    input.placeholder = '✏️ 다른 거 직접 입력';
+    var ok = document.createElement('button');
+    ok.className = 'btn';
+    ok.textContent = '이걸로!';
+    function submit() {
+      var v = input.value.trim();
+      if (!v) { input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake'); input.focus(); return; }
+      pick(key, v);
+      input.value = '';
+    }
+    ok.addEventListener('click', submit);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+    row.appendChild(input); row.appendChild(ok);
+    box.appendChild(row);
+
+    var hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = '목록에 없으면 직접 써줘!';
+    box.appendChild(hint);
+  });
+
+  function pick(key, value) {
+    if (key === 'anju') state.drink = '마셔! (안주: ' + value + ')';
+    else state[key] = value;
+    go(NEXT[key]);
+  }
+
+  // ---------- 5. 밥 ----------
+  var drinkTitle = document.getElementById('drinkTitle');
+  document.getElementById('mealYes').addEventListener('click', function () {
+    drinkTitle.textContent = '밥 먹고 술도? 🍻';
+    go('s-meal');
+  });
+  document.getElementById('mealNo').addEventListener('click', function () {
+    state.meal = '안 먹어';
+    drinkTitle.textContent = '그럼 술? 🍻';
+    go('s-drink-q');
+  });
+
+  // ---------- 7. 술 ----------
+  var nag = document.getElementById('nag');
+  var drinkNo = document.getElementById('drinkNo');
+  var NAGS = ['에이~ 다시 생각해봐 🥺', '진짜 안 돼..?', '알겠어 ㅠ'];
+  document.getElementById('drinkYes').addEventListener('click', function () { go('s-anju'); });
+  drinkNo.addEventListener('click', function () {
+    noCount++;
+    nag.textContent = NAGS[Math.min(noCount, 3) - 1];
+    nag.classList.remove('shake'); void nag.offsetWidth; nag.classList.add('shake');
+    if (noCount >= 3) {
+      drinkNo.disabled = true;
+      state.drink = '안 마셔 🥲';
+      setTimeout(function () { go('s-end'); }, 1100);
+    }
+  });
+
+  // ---------- 9. 카드 ----------
+  function fmtDate(v) {
+    if (!v) return '-';
+    var p = v.split('-');
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    var days = ['일', '월', '화', '수', '목', '금', '토'];
+    return (+p[1]) + '월 ' + (+p[2]) + '일 (' + days[d.getDay()] + ')';
+  }
+  function fmtTime(v) {
+    if (!v) return '-';
+    var p = v.split(':'); var h = +p[0]; var m = p[1];
+    var ap = h < 12 ? '오전' : '오후';
+    var hh = h % 12 === 0 ? 12 : h % 12;
+    return ap + ' ' + hh + ':' + m;
+  }
+  function fillCard() {
+    document.getElementById('c-date').textContent = fmtDate(state.date);
+    document.getElementById('c-time').textContent = fmtTime(state.time);
+    document.getElementById('c-play').textContent = state.play || '-';
+    document.getElementById('c-meal').textContent = state.meal || '-';
+    document.getElementById('c-drink').textContent = state.drink || '-';
+  }
+
+  // ---------- 이미지 저장 ----------
+  var saveBtn = document.getElementById('saveBtn');
+  var overlay = document.getElementById('saveOverlay');
+  document.getElementById('closeOverlay').addEventListener('click', function () { overlay.classList.remove('show'); });
+
+  saveBtn.addEventListener('click', function () {
+    if (typeof html2canvas === 'undefined') { alert('이미지 저장 도구를 불러오지 못했어 ㅠ 화면을 캡처해서 보내줘!'); return; }
+    var label = saveBtn.textContent;
+    saveBtn.disabled = true; saveBtn.textContent = '만드는 중... ⏳';
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    ready.then(function () {
+      return html2canvas(document.getElementById('card'), { scale: 2, backgroundColor: '#fff4cc' });
+    }).then(function (canvas) {
+      var dataUrl = canvas.toDataURL('image/png');
+      canvas.toBlob(function (blob) {
+        var done = function () { saveBtn.disabled = false; saveBtn.textContent = label; };
+        var file = null;
+        try { file = new File([blob], '우리-노는-날.png', { type: 'image/png' }); } catch (e) {}
+        var mobile = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+
+        if (mobile && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: '우리 노는 날 🤙' })
+            .then(done)
+            .catch(function (err) {
+              if (!err || err.name !== 'AbortError') showOverlay(dataUrl);
+              done();
+            });
+          return;
+        }
+        if (mobile) { showOverlay(dataUrl); done(); return; }
+
+        var a = document.createElement('a');
+        a.href = dataUrl; a.download = '우리-노는-날.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        done();
+      }, 'image/png');
+    }).catch(function () {
+      saveBtn.disabled = false; saveBtn.textContent = label;
+      alert('저장에 실패했어 ㅠ 화면을 캡처해서 보내줘!');
+    });
+  });
+  function showOverlay(src) {
+    document.getElementById('saveImg').src = src;
+    overlay.classList.add('show');
+  }
+
+  // ---------- 다시하기 ----------
+  document.getElementById('restartBtn').addEventListener('click', function () {
+    state = { date: '', time: '', play: '', meal: '', drink: '' };
+    noCount = 0; nag.textContent = ''; drinkNo.disabled = false;
+    dateInput.value = ''; timeInput.value = ''; checkDate();
+    go('s-intro');
+  });
+
+  // ---------- 배경 이모지 ----------
+  var EMO = ['🎉', '🎳', '🎤', '🍻', '🎮', '🍕', '✨', '🤙'];
+  var fl = document.getElementById('floaters');
+  for (var i = 0; i < 12; i++) {
+    var s = document.createElement('span');
+    s.textContent = EMO[i % EMO.length];
+    s.style.left = (Math.random() * 95) + '%';
+    s.style.animationDuration = (12 + Math.random() * 12) + 's';
+    s.style.animationDelay = (-Math.random() * 20) + 's';
+    s.style.fontSize = (20 + Math.random() * 16) + 'px';
+    fl.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
