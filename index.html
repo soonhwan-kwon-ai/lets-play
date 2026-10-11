@@ -214,6 +214,20 @@
     </div>
   </section>
 
+  <!-- 3-1. 장소 -->
+  <section class="screen" id="s-place">
+    <div class="panel">
+      <div class="big-emoji">📍</div>
+      <h2>어디서 만날까?</h2>
+      <p class="sub">만날 장소를 적어줘!</p>
+      <div class="field">
+        <label for="placeInput">📍 장소</label>
+        <input type="text" id="placeInput" maxlength="30" placeholder="예: OO역 2번 출구">
+      </div>
+      <button class="btn wide" id="placeNext" disabled>여기서 만나!</button>
+    </div>
+  </section>
+
   <!-- 4. 뭐 하고 놀까 -->
   <section class="screen" id="s-play">
     <div class="panel">
@@ -285,6 +299,7 @@
       <div class="rows">
         <div class="row"><span class="k">📅 날짜</span><span class="v" id="c-date">-</span></div>
         <div class="row"><span class="k">⏰ 시간</span><span class="v" id="c-time">-</span></div>
+        <div class="row"><span class="k">📍 장소</span><span class="v" id="c-place">-</span></div>
         <div class="row"><span class="k">🕹️ 놀거리</span><span class="v" id="c-play">-</span></div>
         <div class="row"><span class="k">🍚 밥</span><span class="v" id="c-meal">-</span></div>
         <div class="row"><span class="k">🍻 술</span><span class="v" id="c-drink">-</span></div>
@@ -316,7 +331,7 @@
   };
   var NEXT = { play: 's-meal-q', meal: 's-drink-q', anju: 's-end' };
 
-  var state = { date: '', time: '', play: '', meal: '', drink: '' };
+  var state = { date: '', time: '', place: '', play: '', meal: '', drink: '' };
   var noCount = 0;
 
   // ---------- 화면 전환 ----------
@@ -415,8 +430,23 @@
   timeInput.addEventListener('change', checkDate);
   dateNext.addEventListener('click', function () {
     state.date = dateInput.value; state.time = timeInput.value;
-    go('s-play');
+    go('s-place');
   });
+
+  // ---------- 3-1. 장소 ----------
+  var placeInput = document.getElementById('placeInput');
+  var placeNext = document.getElementById('placeNext');
+  function checkPlace() { placeNext.disabled = !placeInput.value.trim(); }
+  placeInput.addEventListener('input', checkPlace);
+  function submitPlace() {
+    var v = placeInput.value.trim();
+    if (!v) return;
+    state.place = v;
+    placeInput.blur();
+    go('s-play');
+  }
+  placeNext.addEventListener('click', submitPlace);
+  placeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitPlace(); });
 
   // ---------- 선택지 화면 공통 ----------
   document.querySelectorAll('.choice').forEach(function (box) {
@@ -517,6 +547,7 @@
   function fillCard() {
     document.getElementById('c-date').textContent = fmtDate(state.date);
     document.getElementById('c-time').textContent = fmtTime(state.time);
+    document.getElementById('c-place').textContent = state.place || '-';
     document.getElementById('c-play').textContent = state.play || '-';
     document.getElementById('c-meal').textContent = state.meal || '-';
     document.getElementById('c-drink').textContent = state.drink || '-';
@@ -570,9 +601,10 @@
 
   // ---------- 다시하기 ----------
   document.getElementById('restartBtn').addEventListener('click', function () {
-    state = { date: '', time: '', play: '', meal: '', drink: '' };
+    state = { date: '', time: '', place: '', play: '', meal: '', drink: '' };
     noCount = 0; nag.textContent = ''; drinkNo.disabled = false;
     dateInput.value = ''; timeInput.value = ''; checkDate();
+    placeInput.value = ''; checkPlace();
     go('s-intro');
   });
 
