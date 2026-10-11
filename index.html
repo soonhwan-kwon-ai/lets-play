@@ -82,7 +82,8 @@
   .btn.wide { width: 100%; }
 
   .btn-row { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; min-height: 70px; }
-  #noBtn { transition: left .25s ease, top .25s ease; z-index: 50; }
+  #noBtn { transition: left .25s ease, top .25s ease; z-index: 50; touch-action: none; }
+  #noBtn:active { transform: none; box-shadow: 0 5px 0 #e6dccb; }
   #yesBtn { transition: transform .2s ease, font-size .2s ease, padding .2s ease; }
 
   .field { text-align: left; margin-bottom: 16px; }
@@ -325,6 +326,7 @@
     window.scrollTo(0, 0);
     if (id === 's-end') fillCard();
     if (id === 's-intro') resetNoBtn();
+    else noBtn.style.display = 'none';
   }
   document.querySelectorAll('[data-next]').forEach(function (b) {
     b.addEventListener('click', function () { go(b.dataset.next); });
@@ -333,12 +335,35 @@
   // ---------- 1. 도망가는 '싫어' 버튼 ----------
   var yesBtn = document.getElementById('yesBtn');
   var noBtn = document.getElementById('noBtn');
+  var introRow = document.getElementById('introRow');
   var dodges = 0;
+  var lastDodge = 0;
+  var spacer = null;
   function dodge(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
+    lastDodge = Date.now();
     var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
-    var maxX = window.innerWidth - w - 16;
-    var maxY = window.innerHeight - h - 16;
+    // 처음 도망갈 때: 원래 자리에 투명한 자리표시를 남겨서 '응 좋아!'가 밀려오지 않게 함
+    if (!spacer) {
+      var r = noBtn.getBoundingClientRect();
+      spacer = document.createElement('span');
+      spacer.style.display = 'inline-block';
+      spacer.style.width = w + 'px';
+      spacer.style.height = h + 'px';
+      introRow.insertBefore(spacer, noBtn);
+      document.body.appendChild(noBtn);
+      // 지금 보이는 자리에 먼저 고정해 두고, 거기서부터 부드럽게 이동하게 함
+      noBtn.style.transition = 'none';
+      noBtn.style.position = 'fixed';
+      noBtn.style.left = r.left + 'px';
+      noBtn.style.top = r.top + 'px';
+      void noBtn.offsetWidth;
+      noBtn.style.transition = '';
+    }
+    var vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+    var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var maxX = vw - w - 16;
+    var maxY = vh - h - 16;
     var x, y, tries = 0;
     var yr = yesBtn.getBoundingClientRect();
     do {
@@ -353,14 +378,23 @@
     var scale = Math.min(1 + dodges * 0.08, 1.6);
     yesBtn.style.transform = 'scale(' + scale + ')';
   }
+  // 마우스: 올리기만 해도 도망 / 터치·마우스: 누르는 순간 도망 (한 번만)
   noBtn.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') dodge(e); });
-  noBtn.addEventListener('touchstart', dodge, { passive: false });
   noBtn.addEventListener('pointerdown', dodge);
-  noBtn.addEventListener('click', dodge);
-  yesBtn.addEventListener('click', function () { go('s-yay'); });
+  // 터치 뒤에 따라오는 가짜 클릭이 다른 버튼에 눌리지 않게 막기
+  noBtn.addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
+  noBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (Date.now() - lastDodge > 400) dodge(e); // 키보드로 누른 경우
+  });
+  yesBtn.addEventListener('click', function () {
+    if (Date.now() - lastDodge < 500) return; // 싫어 누르다 잘못 눌린 건 무시
+    go('s-yay');
+  });
 
   function resetNoBtn() {
-    noBtn.style.position = ''; noBtn.style.left = ''; noBtn.style.top = '';
+    noBtn.style.position = ''; noBtn.style.left = ''; noBtn.style.top = ''; noBtn.style.display = '';
+    if (spacer) { introRow.insertBefore(noBtn, spacer); spacer.remove(); spacer = null; }
     yesBtn.style.transform = '';
     dodges = 0;
   }
